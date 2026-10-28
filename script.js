@@ -140,6 +140,7 @@ const RU = {
   "form.note": "Или позвоните прямо сейчас: +998 94 439 00 30",
   "form.okT": "Спасибо!",
   "form.okD": "Ваша заявка принята. Мы скоро с вами свяжемся.",
+  "form.error": "Заявка не отправлена. Попробуйте ещё раз или позвоните: +998 94 439 00 30",
 
   "footer.tag": "Ваше здоровье — самое важное для нас!",
   "footer.credit": "Разработка сайта:"
@@ -205,13 +206,19 @@ tabs.forEach((t, i) => {
 });
 
 // ===== Booking form =====
-// NOTE: the form is not connected to a backend yet. Wire `sendLead` to a
-// Telegram bot, CRM or email service before going live.
+// Submissions go to /api/lead (api/lead.mjs), which posts them to the clinic's Telegram group.
 async function sendLead(data) {
-  console.info("New lead", data);
+  const res = await fetch("/api/lead", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ...data, lang: document.documentElement.lang }),
+  });
+  if (!res.ok) throw new Error("Lead not sent: " + res.status);
 }
 
 const form = document.getElementById("bookingForm");
+const formBtn = form.querySelector('button[type="submit"]');
+const formError = form.querySelector(".form__error");
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
   let valid = true;
@@ -221,11 +228,20 @@ form.addEventListener("submit", async (e) => {
     input.closest(".field").classList.toggle("is-invalid", !ok);
     if (!ok) valid = false;
   });
-  if (!valid) return;
+  if (!valid || formBtn.disabled) return;
 
-  await sendLead(Object.fromEntries(new FormData(form)));
-  form.querySelector(".form__body").hidden = true;
-  form.querySelector(".form__success").hidden = false;
+  formBtn.disabled = true;
+  formError.hidden = true;
+  try {
+    await sendLead(Object.fromEntries(new FormData(form)));
+    form.querySelector(".form__body").hidden = true;
+    form.querySelector(".form__success").hidden = false;
+  } catch (err) {
+    console.error(err);
+    formError.hidden = false;
+  } finally {
+    formBtn.disabled = false;
+  }
 });
 
 // ===== Treatment steps: line fills and circles turn red as you scroll =====

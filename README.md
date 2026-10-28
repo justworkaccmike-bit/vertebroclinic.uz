@@ -10,7 +10,15 @@ node serve.mjs
 
 Then open http://localhost:5173.
 
+## Booking form → Telegram group
+
+The form posts to `/api/lead` (`api/lead.mjs`, a Vercel function), which sends each request to a Telegram group. In Vercel → Project → Settings → Environment Variables set:
+
+- `TELEGRAM_BOT_TOKEN` — token from @BotFather
+- `TELEGRAM_CHAT_ID` — the group's id (starts with `-100`)
+
+then redeploy. Until both are set, the form shows a "not sent, please call" message.
+
 ## Before going live
 
-- Connect the booking form: `sendLead` in `script.js` only logs to the console.
 - Replace `assets/logo.png` with the clinic's original logo file.

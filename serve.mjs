@@ -9,6 +9,16 @@ const types = { ".html": "text/html; charset=utf-8", ".css": "text/css", ".js": 
 
 createServer(async (req, res) => {
   let path = decodeURIComponent(new URL(req.url, "http://x").pathname);
+  // Run the Vercel function locally (set TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID to really send)
+  if (path === "/api/lead") {
+    let raw = "";
+    for await (const chunk of req) raw += chunk;
+    const { default: handler } = await import("./api/lead.mjs");
+    res.status = (code) => ((res.statusCode = code), res);
+    res.json = (obj) => res.setHeader("Content-Type", "application/json").end(JSON.stringify(obj));
+    req.body = raw;
+    return handler(req, res).catch(() => res.status(400).json({ ok: false }));
+  }
   if (path.endsWith("/")) path += "index.html";
   const file = normalize(join(root, path));
   if (!file.startsWith(root)) return res.writeHead(403).end();
@@ -18,4 +28,4 @@ createServer(async (req, res) => {
   } catch {
     res.writeHead(404).end("Not found");
   }
-}).listen(5173, () => console.log("http://localhost:5173"));
+}).listen(process.env.PORT || 5173, () => console.log("http://localhost:" + (process.env.PORT || 5173)));
