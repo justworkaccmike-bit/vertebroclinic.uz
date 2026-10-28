@@ -124,7 +124,8 @@ const RU = {
   "ct.lead": "Оставьте заявку — администратор свяжется с вами и подберёт удобное время. Первичный приём бесплатный.",
   "ct.phone": "Телефон",
   "ct.address": "Адрес",
-  "ct.addressV": "г. Фергана",
+  "ct.addressV": "г. Фергана, ул. Охангарон, 14",
+  "ct.mapLink": "Открыть на карте →",
 
   "form.name": "Ваше имя",
   "form.phone": "Номер телефона",
@@ -140,7 +141,8 @@ const RU = {
   "form.okT": "Спасибо!",
   "form.okD": "Ваша заявка принята. Мы скоро с вами свяжемся.",
 
-  "footer.tag": "Ваше здоровье — самое важное для нас!"
+  "footer.tag": "Ваше здоровье — самое важное для нас!",
+  "footer.credit": "Разработка сайта:"
 };
 
 // ===== Language switch =====
@@ -225,6 +227,32 @@ form.addEventListener("submit", async (e) => {
   form.querySelector(".form__body").hidden = true;
   form.querySelector(".form__success").hidden = false;
 });
+
+// ===== Treatment steps: line fills and circles turn red as you scroll =====
+const stepsList = document.querySelector(".steps");
+const stepItems = [...stepsList.children];
+function updateSteps() {
+  const nums = stepItems.map((s) => s.querySelector(".step__num").getBoundingClientRect());
+  const first = nums[0].top + nums[0].height / 2;
+  const last = nums[nums.length - 1].top + nums[nums.length - 1].height / 2;
+  const vh = window.innerHeight;
+  const p = last - first > 10
+    ? (vh * 0.6 - first) / (last - first) // stacked: fill follows the middle of the screen
+    : (vh * 0.85 - first) / (vh * 0.35);  // one row: fill as the row rises into view
+  const progress = Math.min(1, Math.max(0, p));
+  stepsList.style.setProperty("--p", progress);
+  stepsList.style.setProperty("--last", stepItems[stepItems.length - 1].offsetHeight + "px");
+  stepItems.forEach((s, i) => s.classList.toggle("is-done", progress >= i / (stepItems.length - 1) - 0.001));
+}
+let stepsTick = false;
+const queueSteps = () => {
+  if (stepsTick) return;
+  stepsTick = true;
+  requestAnimationFrame(() => { stepsTick = false; updateSteps(); });
+};
+window.addEventListener("scroll", queueSteps, { passive: true });
+window.addEventListener("resize", queueSteps);
+updateSteps();
 
 // ===== Reveal on scroll =====
 const revealTargets = document.querySelectorAll(".section__head, .card, .tabs, .checklist, .pkg-item, .diag, .step, .doc, .quote, .form, .stats");
