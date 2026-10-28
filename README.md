@@ -15,7 +15,7 @@ Then open http://localhost:5173.
 The form posts to `/api/lead` (`api/lead.mjs`, a Vercel function), which sends each request to a Telegram group. In Vercel → Project → Settings → Environment Variables set:
 
 - `TELEGRAM_BOT_TOKEN` — token from @BotFather
-- `TELEGRAM_CHAT_ID` — the group's id (starts with `-100`)
+- `TELEGRAM_CHAT_ID` — the group's id (a negative number; currently `-5394318260`)
 
 then redeploy. Until both are set, the form shows a "not sent, please call" message.
 

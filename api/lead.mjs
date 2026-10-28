@@ -2,7 +2,7 @@
 // Forwards a booking-form submission to a Telegram group.
 // Needs two environment variables (set them in Vercel → Settings → Environment Variables):
 //   TELEGRAM_BOT_TOKEN – token from @BotFather
-//   TELEGRAM_CHAT_ID   – id of the group the bot was added to (starts with -100…)
+//   TELEGRAM_CHAT_ID   – id of the group the bot was added to (negative number, e.g. -5394318260)
 
 const clean = (v, max) => String(v ?? "").replace(/\s+/g, " ").trim().slice(0, max);
 const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
